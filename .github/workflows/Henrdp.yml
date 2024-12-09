@@ -46,23 +46,25 @@ jobs:
         reg add "HKLM\System\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
         netsh advfirewall firewall set rule group="remote desktop" new enable=yes
 
-    - name: Set Username and Password
+    - name: Activate Administrator Account and Set Password
       run: |
-        # Pastikan akun administrator sudah diaktifkan
-        net user administrator /active:yes
+        # Mengecek apakah akun administrator ada
+        $userExists = (net user administrator) -ne $null
+        if ($userExists) {
+            # Jika akun administrator ada, aktifkan dan set password
+            net user administrator /active:yes
+            net user administrator "HenCoders1234"
+        } else {
+            # Jika akun administrator tidak ditemukan, buat akun baru dengan nama 'admin'
+            net user admin "HenCoders1234" /add
+            net localgroup administrators admin /add
+        }
 
-        # Set password untuk akun administrator
-        net user administrator "HenCoders1234"
-
-    - name: Grant Administrator Login Permissions
+    - name: Enable Auto-Logon
       run: |
-        # Grant remote login permissions to administrator
-        $administratorGroup = "Administrators"
-        $remoteDesktopUsersGroup = "Remote Desktop Users"
-        
-        # Add the Administrator user to Remote Desktop Users group if not already
-        Add-LocalGroupMember -Group $remoteDesktopUsersGroup -Member $administratorGroup
-        echo "Administrator has been granted permission to log in remotely."
+        reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AutoAdminLogon /t REG_SZ /d 1 /f
+        reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultUserName /t REG_SZ /d "administrator" /f
+        reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultPassword /t REG_SZ /d "HenCoders1234" /f
 
     - name: Configure RDP Performance Settings
       run: |
