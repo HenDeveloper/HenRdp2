@@ -89,10 +89,6 @@ jobs:
         reg add "HKCU\Software\Microsoft\Terminal Server Client" /v "RedirectDrives" /t REG_DWORD /d 1 /f
         reg add "HKCU\Software\Microsoft\Terminal Server Client" /v "RedirectPrinters" /t REG_DWORD /d 1 /f
 
-    - name: Enable Audit Logging for RDP
-      run: |
-        auditpol /set /subcategory:"Logon/Logoff" /success:enable /failure:enable
-
     - name: Change RDP Port (Optional for Security)
       run: |
         reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v PortNumber /t REG_DWORD /d 3390 /f
