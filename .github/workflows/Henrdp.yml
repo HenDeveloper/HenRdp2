@@ -62,9 +62,7 @@ jobs:
 
     - name: Configure RDP Settings (Allow Remote Desktop Connections)
       run: |
-        # Enable RDP connection
         reg add "HKLM\System\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
-        # Open firewall for RDP
         netsh advfirewall firewall set rule group="remote desktop" new enable=yes
 
     - name: Display Tailscale IP
