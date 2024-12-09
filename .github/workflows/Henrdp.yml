@@ -48,7 +48,17 @@ jobs:
 
     - name: Set Username and Password
       run: |
-        # Pastikan akun administrator sudah diaktifkan
+        # Memeriksa apakah akun administrator sudah ada
+        $user = Get-WmiObject -Class Win32_UserAccount -Filter "Name='Administrator'" 
+        if ($null -eq $user) {
+            Write-Host "Akun Administrator tidak ditemukan, membuat akun Administrator baru."
+            # Membuat akun Administrator jika tidak ada
+            net user administrator /add
+        } else {
+            Write-Host "Akun Administrator sudah ada, mengaktifkan akun tersebut."
+        }
+
+        # Mengaktifkan akun administrator
         net user administrator /active:yes
 
         # Set password untuk akun administrator
