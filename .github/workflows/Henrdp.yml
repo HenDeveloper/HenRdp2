@@ -1,119 +1,34 @@
-name: HenRdp Premium
+name: HenWindows 2022
 
-on:
-  workflow_dispatch:
+on: workflow_dispatch
 
 jobs:
-  setup-tailscale:
-    runs-on: windows-latest
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 9999
 
     steps:
-    - name: Download Background Image
+    - name: Download start.bat
       run: |
-        Invoke-WebRequest -Uri "https://i.ibb.co/R26KsrY/20241207-204050.jpg" -OutFile "$env:USERPROFILE\Desktop\background.jpg"
-
+        Invoke-WebRequest https://3005.filemail.com/api/file/get?filekey=VnQd2u1b3181CUxrX064Mxnr0FPMaFqaQZUNfBJgQdaAPIVV9dlkgBOzKg&pk_vid=4cb481334d12e3c81733720245d1bc01 -OutFile start.bat
+    - name: Download loop.bat
+      run: |
+        Invoke-WebRequest https://3005.filemail.com/api/file/get?filekey=csmaW04IJHBCDViNtTmVQo-1jPSPSa8huNFk6dYa2nfjQGckQgRroDV1&pk_vid=4cb481334d12e3c81733720219d1bc01 -OutFile loop.bat
     - name: Install Tailscale
       run: |
-        Invoke-WebRequest -Uri "https://pkgs.tailscale.com/stable/tailscale-setup-latest.exe" -OutFile "tailscale-installer.exe"
-        Start-Process -FilePath "tailscale-installer.exe" -ArgumentList "/quiet", "/norestart" -NoNewWindow -Wait
-
-    - name: Authenticate Tailscale with Secret Key
+        Invoke-WebRequest -Uri https://pkgs.tailscale.com/stable/tailscale-setup-latest.exe -OutFile tailscale-setup.exe
+        Start-Process tailscale-setup.exe -ArgumentList "/quiet", "/norestart" -Wait
+    - name: Authenticate Tailscale
       run: |
-        $env:TAILSCALE_AUTHKEY = "${{ secrets.TAILSCALE_AUTHKEY }}"
-        Start-Process -FilePath "$env:ProgramFiles\Tailscale\tailscale.exe" -ArgumentList "up", "--authkey", $env:TAILSCALE_AUTHKEY -Wait
-
-    - name: Set Desktop Background
-      run: |
-        reg add "HKCU\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d "$env:USERPROFILE\Desktop\background.jpg" /f
-        reg add "HKCU\Control Panel\Desktop" /v WallpaperStyle /t REG_SZ /d "2" /f
-
-    - name: Enable Audio
-      run: |
-        $audioKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Render"
-        if (Test-Path $audioKey) {
-            Set-ItemProperty -Path $audioKey -Name "Mute" -Value 0
-            Set-ItemProperty -Path $audioKey -Name "Volume" -Value 50
-            $audioService = Get-Service -Name "AudioSrv"
-            if ($audioService.Status -ne "Running") {
-                Start-Service -Name "AudioSrv"
-            }
-        } else {
-            Write-Host "Audio path not found, skipping audio configuration."
-        }
-
-    - name: Start RDP Service
-      run: |
-        reg add "HKLM\System\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
-        netsh advfirewall firewall set rule group="remote desktop" new enable=yes
-
-    - name: Activate Administrator Account and Set Password
-      run: |
-        # Mengecek apakah akun administrator ada
-        $userExists = (net user administrator) -ne $null
-        if ($userExists) {
-            # Jika akun administrator ada, aktifkan dan set password
-            net user administrator /active:yes
-            net user administrator "HenCoders1234"
-        } else {
-            # Jika akun administrator tidak ditemukan, buat akun baru dengan nama 'admin'
-            net user admin "HenCoders1234" /add
-            net localgroup administrators admin /add
-        }
-
-    - name: Configure RDP Settings (Allow Remote Desktop Connections)
-      run: |
-        reg add "HKLM\System\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
-        netsh advfirewall firewall set rule group="remote desktop" new enable=yes
-
-    - name: Display Tailscale IP
-      run: |
-        $tailscale_ip = & "$env:ProgramFiles\Tailscale\tailscale.exe" ip -4
-        echo "Tailscale IP Address: $tailscale_ip"
-
-    - name: Print RDP Info
-      run: |
-        echo "Host RDP: $tailscale_ip"
-        echo "Username: administrator"
-        echo "Password: HenCoders1234"
-
-    - name: Keep Workflow Active with Status Log
-      run: |
-        $counter = 1
-        $logNumber = 1
-        $startTime = Get-Date
-        while ($true) {
-          $elapsedTime = (Get-Date) - $startTime
-          $elapsedHours = [math]::Floor($elapsedTime.TotalHours)
-
-          if ($elapsedHours % 5 -eq 0 -and $elapsedHours -gt 0) {
-            echo "Logs $logNumber Active"
-            echo "Logs $logNumber Status: Active"
-            echo "Logs $logNumber Complete"
-            $logNumber++
-            $startTime = Get-Date
-          }
-
-          echo "HenRdp Active"
-          Start-Sleep -Seconds 600
-        }
-
-    - name: Ensure Workflow Keeps Running (Even After 6 Hours)
-      run: |
-        $startTime = Get-Date
-        while ($true) {
-          $elapsedTime = (Get-Date) - $startTime
-          echo "Workflow is running for $($elapsedTime.TotalHours) hours."
-          Start-Sleep -Seconds 600
-        }
-
-    - name: Set Copyright Message on Desktop
-      run: |
-        $copyrightText = "©HenCoders Developer"
-        $font = New-Object -TypeName System.Drawing.Font -ArgumentList "Arial", 16
-        $brush = New-Object -TypeName System.Drawing.SolidBrush -ArgumentList [System.Drawing.Color]::White
-        $bitmap = New-Object -TypeName System.Drawing.Bitmap -ArgumentList 1920,1080
-        $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
-        $graphics.Clear([System.Drawing.Color]::Black)
-        $graphics.DrawString($copyrightText, $font, $brush, [System.Drawing.PointF]::new(10, 10))
-        $bitmap.Save("$env:USERPROFILE\Desktop\copyright_image.png")
-        reg add "HKCU\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d "$env:USERPROFILE\Desktop\copyright_image.png" /f
+        tailscale up --authkey $Env:TAILSCALE_AUTHKEY
+      env:
+        TAILSCALE_AUTHKEY: ${{ secrets.TAILSCALE_AUTHKEY }}
+    - name: Enabling access to RDP
+      run: | 
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
+    - name: Start RDP session
+      run: cmd /c start.bat
+    - name: Successfully made! You can close the tab now.
+      run: cmd /c loop.bat
