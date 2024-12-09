@@ -48,8 +48,11 @@ jobs:
 
     - name: Set Username and Password
       run: |
-        net user administrator "HenCoders1234"
+        # Pastikan akun administrator sudah diaktifkan
         net user administrator /active:yes
+
+        # Set password untuk akun administrator
+        net user administrator "HenCoders1234"
 
     - name: Enable Auto-Logon
       run: |
