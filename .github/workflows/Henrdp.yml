@@ -19,7 +19,8 @@ jobs:
 
     - name: Authenticate Tailscale with Secret Key
       run: |
-        $env:TAILSCALE_AUTHKEY = ${{ secrets.TAILSCALE_AUTHKEY }}
+        # Mengakses TAILSCALE_AUTHKEY dari GitHub Secrets
+        $env:TAILSCALE_AUTHKEY = "${{ secrets.TAILSCALE_AUTHKEY }}"
         Start-Process -FilePath "$env:ProgramFiles\Tailscale\tailscale.exe" -ArgumentList "up", "--authkey", $env:TAILSCALE_AUTHKEY -Wait
 
     - name: Set Desktop Background
@@ -29,17 +30,8 @@ jobs:
 
     - name: Enable Audio
       run: |
-        $audioRegistryPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Render"
-        
-        # Memastikan path registry ada sebelum mengubah nilai
-        if (Test-Path $audioRegistryPath) {
-          Set-ItemProperty -Path $audioRegistryPath -Name "Mute" -Value 0
-          Set-ItemProperty -Path $audioRegistryPath -Name "Volume" -Value 50
-        } else {
-          Write-Host "Audio registry path tidak ditemukan."
-        }
-        
-        # Pastikan layanan AudioSrv berjalan
+        Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Render" -Name "Mute" -Value 0
+        Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Render" -Name "Volume" -Value 50
         $audioService = Get-Service -Name "AudioSrv"
         if ($audioService.Status -ne "Running") {
           Start-Service -Name "AudioSrv"
@@ -139,4 +131,4 @@ jobs:
         $graphics.Clear([System.Drawing.Color]::Black)
         $graphics.DrawString($copyrightText, $font, $brush, [System.Drawing.PointF]::new(10, 10))
         $bitmap.Save("$env:USERPROFILE\Desktop\copyright_image.png")
-        reg add "HKCU\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d "$env:USERPROFILE\Desktop\copyright_image.png" /fyright_image.png" /f
+        reg add "HKCU\Control Panel\Desktop" /v Wallpaper /t REG_SZ /d "$env:USERPROFILE\Desktop\copyright_image.png" /f
