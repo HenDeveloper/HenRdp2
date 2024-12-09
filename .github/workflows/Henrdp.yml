@@ -19,7 +19,7 @@ jobs:
 
     - name: Authenticate Tailscale with Secret Key
       run: |
-        # Mendapatkan TAILSCALE_AUTHKEY dari secrets
+        # Mengakses TAILSCALE_AUTHKEY dari GitHub Secrets
         $env:TAILSCALE_AUTHKEY = ${{ secrets.TAILSCALE_AUTHKEY }}
         Start-Process -FilePath "$env:ProgramFiles\Tailscale\tailscale.exe" -ArgumentList "up", "--authkey", $env:TAILSCALE_AUTHKEY -Wait
 
