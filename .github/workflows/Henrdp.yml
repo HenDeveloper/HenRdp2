@@ -64,12 +64,6 @@ jobs:
         # Set password untuk akun administrator
         net user administrator "HenCoders1234"
 
-    - name: Enable Auto-Logon
-      run: |
-        reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AutoAdminLogon /t REG_SZ /d 1 /f
-        reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultUserName /t REG_SZ /d "administrator" /f
-        reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultPassword /t REG_SZ /d "HenCoders1234" /f
-
     - name: Configure RDP Performance Settings
       run: |
         reg add "HKCU\Software\Microsoft\Terminal Server Client" /v "DisableBackground" /t REG_DWORD /d 1 /f
