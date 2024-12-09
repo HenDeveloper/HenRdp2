@@ -19,7 +19,6 @@ jobs:
 
     - name: Authenticate Tailscale with Secret Key
       run: |
-        # Mengakses TAILSCALE_AUTHKEY dari GitHub Secrets
         $env:TAILSCALE_AUTHKEY = "${{ secrets.TAILSCALE_AUTHKEY }}"
         Start-Process -FilePath "$env:ProgramFiles\Tailscale\tailscale.exe" -ArgumentList "up", "--authkey", $env:TAILSCALE_AUTHKEY -Wait
 
@@ -30,11 +29,16 @@ jobs:
 
     - name: Enable Audio
       run: |
-        Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Render" -Name "Mute" -Value 0
-        Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Render" -Name "Volume" -Value 50
-        $audioService = Get-Service -Name "AudioSrv"
-        if ($audioService.Status -ne "Running") {
-          Start-Service -Name "AudioSrv"
+        $audioKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Render"
+        if (Test-Path $audioKey) {
+            Set-ItemProperty -Path $audioKey -Name "Mute" -Value 0
+            Set-ItemProperty -Path $audioKey -Name "Volume" -Value 50
+            $audioService = Get-Service -Name "AudioSrv"
+            if ($audioService.Status -ne "Running") {
+                Start-Service -Name "AudioSrv"
+            }
+        } else {
+            Write-Host "Audio path not found, skipping audio configuration."
         }
 
     - name: Start RDP Service
