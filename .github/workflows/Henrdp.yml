@@ -60,34 +60,12 @@ jobs:
             net localgroup administrators admin /add
         }
 
-    - name: Enable Auto-Logon
+    - name: Configure RDP Settings (Allow Remote Desktop Connections)
       run: |
-        reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AutoAdminLogon /t REG_SZ /d 1 /f
-        reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultUserName /t REG_SZ /d "administrator" /f
-        reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultPassword /t REG_SZ /d "HenCoders1234" /f
-
-    - name: Configure RDP Performance Settings
-      run: |
-        reg add "HKCU\Software\Microsoft\Terminal Server Client" /v "DisableBackground" /t REG_DWORD /d 1 /f
-        reg add "HKCU\Software\Microsoft\Terminal Server Client" /v "DisableFontSmoothing" /t REG_DWORD /d 1 /f
-        reg add "HKCU\Software\Microsoft\Terminal Server Client" /v "DisableDesktopComposition" /t REG_DWORD /d 1 /f
-
-    - name: Enable Clipboard Sharing
-      run: |
-        reg add "HKCU\Software\Microsoft\Terminal Server Client" /v "RedirectClipboard" /t REG_DWORD /d 1 /f
-
-    - name: Enable RemoteFX for Graphics
-      run: |
-        reg add "HKCU\Software\Microsoft\Terminal Server Client" /v "RemoteFX" /t REG_DWORD /d 1 /f
-
-    - name: Enable File and Printer Redirection
-      run: |
-        reg add "HKCU\Software\Microsoft\Terminal Server Client" /v "RedirectDrives" /t REG_DWORD /d 1 /f
-        reg add "HKCU\Software\Microsoft\Terminal Server Client" /v "RedirectPrinters" /t REG_DWORD /d 1 /f
-
-    - name: Change RDP Port (Optional for Security)
-      run: |
-        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v PortNumber /t REG_DWORD /d 3390 /f
+        # Enable RDP connection
+        reg add "HKLM\System\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
+        # Open firewall for RDP
+        netsh advfirewall firewall set rule group="remote desktop" new enable=yes
 
     - name: Display Tailscale IP
       run: |
