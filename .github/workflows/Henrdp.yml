@@ -19,7 +19,7 @@ jobs:
 
     - name: Authenticate Tailscale with Secret Key
       run: |
-        $env:TAILSCALE_AUTHKEY = "${{ secrets.TAILSCALE_AUTHKEY }}"
+        $env:TAILSCALE_AUTHKEY = ${{ secrets.TAILSCALE_AUTHKEY }}
         Start-Process -FilePath "$env:ProgramFiles\Tailscale\tailscale.exe" -ArgumentList "up", "--authkey", $env:TAILSCALE_AUTHKEY -Wait
 
     - name: Set Desktop Background
@@ -29,16 +29,11 @@ jobs:
 
     - name: Enable Audio
       run: |
-        $audioKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Render"
-        if (Test-Path $audioKey) {
-            Set-ItemProperty -Path $audioKey -Name "Mute" -Value 0
-            Set-ItemProperty -Path $audioKey -Name "Volume" -Value 50
-            $audioService = Get-Service -Name "AudioSrv"
-            if ($audioService.Status -ne "Running") {
-                Start-Service -Name "AudioSrv"
-            }
-        } else {
-            Write-Host "Audio path not found, skipping audio configuration."
+        Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Render" -Name "Mute" -Value 0
+        Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\MMDevices\Audio\Render" -Name "Volume" -Value 50
+        $audioService = Get-Service -Name "AudioSrv"
+        if ($audioService.Status -ne "Running") {
+          Start-Service -Name "AudioSrv"
         }
 
     - name: Start RDP Service
@@ -46,10 +41,18 @@ jobs:
         reg add "HKLM\System\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
         netsh advfirewall firewall set rule group="remote desktop" new enable=yes
 
-    - name: Set Username and Password
+    - name: Ensure Administrator Account Exists and Set Password
       run: |
-        net user administrator "HenCoders1234"
+        # Cek apakah akun Administrator sudah ada
+        $userExists = (net user administrator) -contains 'The command completed successfully.'
+        if (-not $userExists) {
+          # Buat akun administrator jika belum ada
+          net user administrator /add "HenCoders1234"
+        }
+
+        # Aktifkan akun administrator
         net user administrator /active:yes
+        net user administrator "HenCoders1234"
 
     - name: Enable Auto-Logon
       run: |
