@@ -1,4 +1,6 @@
 @echo off
+set TAILSCALE_PATH="C:\Program Files\Tailscale\tailscale.exe"
+
 del /f "C:\Users\Public\Desktop\Epic Games Launcher.lnk" > out.txt 2>&1
 net config server /srvcomment:"Windows Server 2022 by @HenRDP2024" > out.txt 2>&1
 REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer" /V EnableAutoTray /T REG_DWORD /D 0 /F > out.txt 2>&1
@@ -14,7 +16,10 @@ ICACLS C:\Windows\Temp /grant administrator:F >nul
 ICACLS C:\Windows\installer /grant administrator:F >nul
 echo Successfully Installed, If the RDP is Dead, Please Rebuild Again!
 echo IP (Tailscale): 
-tailscale status | findstr "Tailscale IP" > nul && tailscale status | findstr "Tailscale IP" || echo "Tailscale not connected."
+
+:: Menggunakan jalur penuh Tailscale
+%TAILSCALE_PATH% status | findstr "Tailscale IP" > nul && %TAILSCALE_PATH% status | findstr "Tailscale IP" || echo "Tailscale not connected."
+
 echo Username: administrator
 echo Password: HenRDP2024
 echo Please log in to your RDP via Tailscale!
