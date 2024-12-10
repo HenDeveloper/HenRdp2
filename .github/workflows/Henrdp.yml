@@ -29,8 +29,6 @@ jobs:
         Invoke-WebRequest -Uri https://downloads.rclone.org/v1.68.2/rclone-v1.68.2-windows-amd64.zip -OutFile rclone.zip
         Expand-Archive rclone.zip -DestinationPath C:\rclone
         $env:Path += ";C:\rclone\rclone-v1.68.2-windows-amd64"
-    - name: Verify rclone installation path
-      run: |
         echo $env:Path
     - name: Configure rclone with Google Drive
       run: |
