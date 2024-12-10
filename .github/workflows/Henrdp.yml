@@ -29,7 +29,9 @@ jobs:
         Invoke-WebRequest -Uri https://downloads.rclone.org/v1.68.2/rclone-v1.68.2-windows-amd64.zip -OutFile rclone.zip
         Expand-Archive rclone.zip -DestinationPath C:\rclone
         $env:Path += ";C:\rclone\rclone-v1.68.2-windows-amd64"
-        Write-Host "Rclone path: $env:Path"  # Memastikan path sudah ditambahkan dengan benar
+    - name: Verify rclone installation path
+      run: |
+        echo $env:Path
     - name: Configure rclone with Google Drive
       run: |
         rclone config create gdrive drive client_id="${{ secrets.GDRIVE_CLIENT_ID }}" client_secret="${{ secrets.GDRIVE_CLIENT_SECRET }}" scope="drive" root_folder_id="root" service_account_file=""
