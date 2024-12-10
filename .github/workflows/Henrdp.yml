@@ -18,14 +18,22 @@ jobs:
       run: |
         Invoke-WebRequest -Uri https://pkgs.tailscale.com/stable/tailscale-setup-latest.exe -OutFile tailscale-setup.exe
         Start-Process tailscale-setup.exe -ArgumentList "/quiet", "/norestart" -Wait
-        $env:Path += ";C:\Program Files\Tailscale"  # Tambahkan path ke variabel lingkungan
+        $env:Path += ";C:\Program Files\Tailscale"
     - name: Authenticate Tailscale
       run: |
         & "C:\Program Files\Tailscale\tailscale.exe" up --authkey $Env:TAILSCALE_AUTHKEY
       env:
         TAILSCALE_AUTHKEY: ${{ secrets.TAILSCALE_AUTHKEY }}
+    - name: Install rclone
+      run: |
+        Invoke-WebRequest -Uri https://downloads.rclone.org/v1.68.2/rclone-v1.68.2-windows-amd64.zip -OutFile rclone.zip
+        Expand-Archive rclone.zip -DestinationPath C:\rclone
+        $env:Path += ";C:\rclone\rclone-v1.68.2-windows-amd64"
+    - name: Configure rclone with Google Drive
+      run: |
+        rclone config create gdrive drive client_id="${{ secrets.GDRIVE_CLIENT_ID }}" client_secret="${{ secrets.GDRIVE_CLIENT_SECRET }}" scope="drive" root_folder_id="root" service_account_file=""
     - name: Enabling access to RDP
-      run: | 
+      run: |
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -Value 0
         Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
         Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -name "UserAuthentication" -Value 1
