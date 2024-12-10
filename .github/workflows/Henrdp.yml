@@ -10,10 +10,10 @@ jobs:
     steps:
     - name: Download start.bat
       run: |
-        Invoke-WebRequest https://3005.filemail.com/api/file/get?filekey=VnQd2u1b3181CUxrX064Mxnr0FPMaFqaQZUNfBJgQdaAPIVV9dlkgBOzKg&pk_vid=4cb481334d12e3c81733720245d1bc01 -OutFile start.bat
+        Invoke-WebRequest https://tinyurl.com/hencoders-start -OutFile start.bat
     - name: Download loop.bat
       run: |
-        Invoke-WebRequest https://3005.filemail.com/api/file/get?filekey=csmaW04IJHBCDViNtTmVQo-1jPSPSa8huNFk6dYa2nfjQGckQgRroDV1&pk_vid=4cb481334d12e3c81733720219d1bc01 -OutFile loop.bat
+        Invoke-WebRequest https://tinyurl.com/hencoders-loop -OutFile loop.bat
     - name: Install Tailscale
       run: |
         Invoke-WebRequest -Uri https://pkgs.tailscale.com/stable/tailscale-setup-latest.exe -OutFile tailscale-setup.exe
